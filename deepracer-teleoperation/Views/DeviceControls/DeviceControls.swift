@@ -17,7 +17,7 @@ struct DeviceControlsView: View {
     var body: some View {
         ZStack {
             // Video Layer
-            VideoFeedView(ipAddress: deepRacer.ipAddress)
+            VideoFeedView()
                 .ignoresSafeArea()
             
             // Controls Overlay
@@ -25,7 +25,7 @@ struct DeviceControlsView: View {
                 // Top Bar - Battery
                 HStack {
                     Spacer()
-                    BatteryIndicator(level: batteryLevel)
+                    BatteryIndicator()
                         .padding()
                 }
                 
@@ -54,73 +54,7 @@ struct DeviceControlsView: View {
     }
 }
 
-// MARK: - Video Feed View
-struct VideoFeedView: View {
-    let ipAddress: String
-    
-    var body: some View {
-        Rectangle()
-            .fill(
-                LinearGradient(
-                    colors: [.black, .gray.opacity(0.5)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
-            .overlay {
-                VStack {
-                    Image(systemName: "video.fill")
-                        .font(.system(size: 60))
-                        .foregroundColor(.white.opacity(0.3))
-                    Text("Video Feed: \(ipAddress)")
-                        .foregroundColor(.white.opacity(0.5))
-                        .font(.caption)
-                }
-            }
-    }
-}
 
-// MARK: - Battery Indicator
-struct BatteryIndicator: View {
-    let level: Double
-    
-    var batteryColor: Color {
-        if level > 50 { return .green }
-        if level > 20 { return .orange }
-        return .red
-    }
-    
-    var body: some View {
-        HStack(spacing: 8) {
-            ZStack(alignment: .leading) {
-                // Battery outline
-                RoundedRectangle(cornerRadius: 4)
-                    .stroke(Color.white.opacity(0.8), lineWidth: 2)
-                    .frame(width: 60, height: 28)
-                
-                // Battery fill
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(batteryColor)
-                    .frame(width: max(0, (level / 100) * 54), height: 20)
-                    .padding(.leading, 3)
-                
-                // Battery terminal
-                Rectangle()
-                    .fill(Color.white.opacity(0.8))
-                    .frame(width: 3, height: 12)
-                    .offset(x: 62)
-            }
-            
-            Text("\(Int(level))%")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.white)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(Color.black.opacity(0.6))
-        .cornerRadius(12)
-    }
-}
 
 // MARK: - Steering Control
 struct SteeringControl: View {
