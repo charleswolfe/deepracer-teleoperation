@@ -65,7 +65,6 @@ class MJPEGStreamer: NSObject, URLSessionDataDelegate {
             let frameData = receivedData.subdata(in: startRange.lowerBound..<endRange.upperBound)
             
             if let image = UIImage(data: frameData) {
-                print("update image")
                 DispatchQueue.main.async {
                     self.uiImage = image
                 }
@@ -75,8 +74,7 @@ class MJPEGStreamer: NSObject, URLSessionDataDelegate {
             receivedData.removeSubrange(0..<endRange.upperBound)
         }
         if receivedData.count > 5_000_000 { receivedData.removeAll() }
-        
-        print("Probbaly lost video feed")
+
     }
     
     // Handle SSL Bypass directly in the streamer for safety

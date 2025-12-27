@@ -18,6 +18,7 @@ class DeepRacerManager {
     var isAuthenticated: Bool = false
     var isLoggingIn: Bool = false
     var lastError: String? = nil  // Added this property
+    private var csrfToken: String? = nil  // Store CSRF token for drive commands
 
     // --- Data State ---
     var batteryLevel: Int = 0
@@ -52,8 +53,9 @@ class DeepRacerManager {
         }
         
         do {
-            let csrfToken = try await fetchCSRFToken()
-            try await performLoginPost(token: csrfToken)
+            let token = try await fetchCSRFToken()
+            self.csrfToken = token
+            try await performLoginPost(token: token)
             
             await MainActor.run {
                 self.isAuthenticated = true
@@ -103,8 +105,10 @@ class DeepRacerManager {
 
     func setManualMode() async throws {
         guard let url = URL(string: "https://\(ipAddress)/api/drive_mode") else { return }
+        guard let token = csrfToken else {
+            throw NSError(domain: "DeepRacer", code: -1, userInfo: [NSLocalizedDescriptionKey: "No CSRF token"])
+        }
         
-        // 1. Prepare the JSON data
         let body: [String: String] = ["drive_mode": "manual"]
         guard let jsonData = try? JSONSerialization.data(withJSONObject: body) else { return }
         
@@ -112,6 +116,7 @@ class DeepRacerManager {
         request.httpMethod = "PUT"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("https://\(ipAddress)/home", forHTTPHeaderField: "Referer")
+        request.setValue(token, forHTTPHeaderField: "X-CSRFToken")
         request.httpBody = jsonData
         
         let (_, response) = try await session.data(for: request)
@@ -123,37 +128,58 @@ class DeepRacerManager {
     
     func drive(angle: Double, throttle: Double) async throws {
         guard let url = URL(string: "https://\(ipAddress)/api/manual_drive") else { return }
+        guard let token = csrfToken else {
+            print("❌ No CSRF token available")
+            throw NSError(domain: "DeepRacer", code: -1, userInfo: [NSLocalizedDescriptionKey: "No CSRF token"])
+        }
         
-        let angleStr = String(format: "%.3f", angle)
-        let throttleStr = String(format: "%.3f", throttle)
-        
-        let body: [String: String] = [
-            "angle": angleStr,
-            "throttle": throttleStr,
-            "max_speed": "0.5"
+        // DeepRacer expects numeric values, not strings
+        let body: [String: Any] = [
+            "angle": angle,
+            "throttle": throttle,
+            "max_speed": 0.5
         ]
         
-        //let body: [String: String] = ["angle": angle, "throttle": throttle, "max_speed": "0.5"]
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: body) else { return }
+        print("🚗 Sending drive command: angle=\(angle), throttle=\(throttle)")
+        
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: body) else {
+            print("❌ Failed to serialize JSON")
+            return
+        }
+        
+        // Debug: print the actual JSON being sent
+        if let jsonString = String(data: jsonData, encoding: .utf8) {
+            print("   JSON: \(jsonString)")
+        }
         
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("https://\(ipAddress)/home", forHTTPHeaderField: "Referer")
+        request.setValue(token, forHTTPHeaderField: "X-CSRFToken")  // Add CSRF token header
         request.httpBody = jsonData
         
-        let (_, response) = try await session.data(for: request)
+        let (data, response) = try await session.data(for: request)
         
-        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+        guard let httpResponse = response as? HTTPURLResponse else {
             throw URLError(.badServerResponse)
         }
         
+        if !(200...299).contains(httpResponse.statusCode) {
+            print("❌ Drive failed with status: \(httpResponse.statusCode)")
+            if let responseStr = String(data: data, encoding: .utf8) {
+                print("   Response: \(responseStr)")
+            }
+            throw URLError(.badServerResponse)
+        }
     }
     
     func startdrive() async throws {
         guard let url = URL(string: "https://\(ipAddress)/api/start_stop") else { return }
+        guard let token = csrfToken else {
+            throw NSError(domain: "DeepRacer", code: -1, userInfo: [NSLocalizedDescriptionKey: "No CSRF token"])
+        }
         
-        // 1. Prepare the JSON data
         let body: [String: String] = ["start_stop": "start"]
         guard let jsonData = try? JSONSerialization.data(withJSONObject: body) else { return }
         
@@ -161,6 +187,7 @@ class DeepRacerManager {
         request.httpMethod = "PUT"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("https://\(ipAddress)/home", forHTTPHeaderField: "Referer")
+        request.setValue(token, forHTTPHeaderField: "X-CSRFToken")
         request.httpBody = jsonData
         
         let (_, response) = try await session.data(for: request)
@@ -172,8 +199,10 @@ class DeepRacerManager {
     
     func stopdrive() async throws {
         guard let url = URL(string: "https://\(ipAddress)/api/start_stop") else { return }
+        guard let token = csrfToken else {
+            throw NSError(domain: "DeepRacer", code: -1, userInfo: [NSLocalizedDescriptionKey: "No CSRF token"])
+        }
         
-        // 1. Prepare the JSON data
         let body: [String: String] = ["start_stop": "stop"]
         guard let jsonData = try? JSONSerialization.data(withJSONObject: body) else { return }
         
@@ -181,9 +210,10 @@ class DeepRacerManager {
         request.httpMethod = "PUT"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("https://\(ipAddress)/home", forHTTPHeaderField: "Referer")
+        request.setValue(token, forHTTPHeaderField: "X-CSRFToken")
         request.httpBody = jsonData
         
-        let (data, response) = try await session.data(for: request)
+        let (_, response) = try await session.data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
             throw URLError(.badServerResponse)
@@ -283,11 +313,24 @@ class DeepRacerManager {
             // Start the drive session on the device
             Task {
                 do {
+                    // 1. First set manual mode
+                    try await setManualMode()
+                    print("✓ Manual mode set")
+                    
+                    // 2. Then start the drive session
                     try await startdrive()
-                    // Begin continuous drive command loop
+                    print("✓ Drive session started")
+                    
+                    // 3. Small delay to let the device settle
+                    try await Task.sleep(nanoseconds: 100_000_000) // 100ms
+                    
+                    // 4. Begin continuous drive command loop
                     startDriveLoop()
                 } catch {
                     print("Failed to start drive session: \(error)")
+                    if let urlError = error as? URLError {
+                        print("  URL Error code: \(urlError.code.rawValue)")
+                    }
                     await MainActor.run {
                         isDriving = false
                     }

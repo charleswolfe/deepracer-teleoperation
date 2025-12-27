@@ -123,6 +123,7 @@ struct ThrottleControl: View {
                                     engineRumble = throttle > 0 ? 2 : -2
                                 }
                             }
+                            print("throttle needs to be -1 to 1 \(throttle)")
                             manager.updateThrottle(throttle: throttle)
                         }
                         .onEnded { _ in
