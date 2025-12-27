@@ -48,6 +48,13 @@ struct DeviceLoadingView: View {
                                 }
                             }
                         }
+                        
+
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            BatteryIndicator()
+                                .padding()
+                        }
+                        
                     }
             case .failed(let error):
                 failedView(error: error)

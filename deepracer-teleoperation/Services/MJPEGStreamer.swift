@@ -44,34 +44,10 @@ class MJPEGStreamer: NSObject, URLSessionDataDelegate {
         uiImage = nil
     }
 
-    // This handles the incoming stream chunks
-//    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-//        guard isRunning else { return }
-//        receivedData.append(data)
-//        
-//        // 1. Look for the JPEG end marker
-//        if let endRange = receivedData.range(of: Data([0xFF, 0xD9]), options: .backwards) {
-//            let frameData = receivedData.subdata(in: 0..<endRange.upperBound)
-//            
-//            // 2. Look for the JPEG start marker
-//            if let startRange = frameData.range(of: Data([0xFF, 0xD8]), options: .backwards) {
-//                let imageData = frameData.subdata(in: startRange.lowerBound..<frameData.count)
-//                
-//                if let image = UIImage(data: imageData) {
-//                    self.uiImage = image
-//                }
-//            }
-//            
-//            // 3. Keep the buffer clean
-//            receivedData.removeSubrange(0..<endRange.upperBound)
-//        }
-//        
-//        // Emergency clear if buffer explodes
-//        if receivedData.count > 5_000_000 { receivedData.removeAll() }
-//    }
     
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         guard isRunning else { return }
+        
         receivedData.append(data)
         
         while true {
@@ -89,6 +65,7 @@ class MJPEGStreamer: NSObject, URLSessionDataDelegate {
             let frameData = receivedData.subdata(in: startRange.lowerBound..<endRange.upperBound)
             
             if let image = UIImage(data: frameData) {
+                print("update image")
                 DispatchQueue.main.async {
                     self.uiImage = image
                 }
@@ -97,6 +74,9 @@ class MJPEGStreamer: NSObject, URLSessionDataDelegate {
             // 5. Clear everything up to the end of this frame
             receivedData.removeSubrange(0..<endRange.upperBound)
         }
+        if receivedData.count > 5_000_000 { receivedData.removeAll() }
+        
+        print("Probbaly lost video feed")
     }
     
     // Handle SSL Bypass directly in the streamer for safety

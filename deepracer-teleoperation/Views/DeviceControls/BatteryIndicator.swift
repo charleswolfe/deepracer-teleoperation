@@ -27,13 +27,13 @@ struct BatteryIndicator: View {
                 // Battery outline
                 RoundedRectangle(cornerRadius: 4)
                     .stroke(Color.white.opacity(0.8), lineWidth: 2)
-                    .frame(width: 60, height: 28)
+                    .frame(width: 40, height: 20)
                 
                 // Battery fill - only show when battery is connected
                 if manager.batteryLevel != -1 {
                     RoundedRectangle(cornerRadius: 2)
                         .fill(batteryColor)
-                        .frame(width: max(0, (displayLevel / 100) * 54), height: 20)
+                        .frame(width: max(0, (displayLevel / 100) * 35), height: 15)
                         .padding(.leading, 3)
                         .animation(.spring, value: displayLevel)
                 }
@@ -41,22 +41,22 @@ struct BatteryIndicator: View {
                 // Battery terminal
                 Rectangle()
                     .fill(Color.white.opacity(0.8))
-                    .frame(width: 3, height: 12)
-                    .offset(x: 62)
+                    .frame(width: 3, height: 9)
+                    .offset(x: 41)
                 
                 // Slash through battery when not connected
                 if manager.batteryLevel == -1 {
                     // Diagonal slash
                     Rectangle()
                         .fill(Color.red.opacity(0.7))
-                        .frame(width: 3, height: 40)
+                        .frame(width: 2, height: 25)
                         .rotationEffect(.degrees(45))
-                        .offset(x: 30, y: 0)
+                        .offset(x: 20, y: 0)
                     
                     // Optional: Add a subtle background to make slash more visible
                     RoundedRectangle(cornerRadius: 2)
                         .fill(Color.gray.opacity(0.3))
-                        .frame(width: 54, height: 20)
+                        .frame(width: 35, height: 15)
                         .padding(.leading, 3)
                 }
             }
@@ -66,11 +66,10 @@ struct BatteryIndicator: View {
                 .foregroundColor(.white)
                 .monospacedDigit()
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(Color.black.opacity(0.6))
+        .padding(.horizontal, 6)
+        .padding(.vertical, 5)
+        .background(Color.black.opacity(0.4))
         .cornerRadius(12)
-        // MARK: - Polling Logic
         .task {
             // This loop runs as long as the view is visible
             while !Task.isCancelled {
@@ -87,5 +86,7 @@ struct BatteryIndicator: View {
 }
 
 #Preview {
-    BatteryIndicator()
+    @Previewable @State var manager = DeepRacerManager.shared
+    manager.batteryLevel = 85
+    return BatteryIndicator()
 }
