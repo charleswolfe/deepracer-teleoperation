@@ -18,7 +18,6 @@ struct DeepRacerListView: View {
         NavigationView {
             List {
                 ForEach(deepRacers) { racer in
-                    
                     NavigationLink(destination: DeviceLoadingView(deepRacer: racer)) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(racer.name)
@@ -29,14 +28,11 @@ struct DeepRacerListView: View {
                         }
                         .padding(.vertical, 4)
                     }
-                    
-                    
-                    
-                    
                 }
                 .onDelete(perform: deleteRacers)
             }
             .navigationTitle("DeepRacers")
+            .toolbarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingAddSheet = true }) {
