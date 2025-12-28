@@ -1,0 +1,79 @@
+Privacy Policy
+DeepRacers App
+Last Updated: 2025-12-28
+
+1. No Data Collection
+DeepRacers does not collect, store, or transmit any personal data from its users. The app:
+
+Does not track any user activity
+
+Does not collect analytics or usage data
+
+Does not store any personal information
+
+Does not connect to external servers or APIs
+
+Does not use cookies or similar tracking technologies
+
+2. Local-Only Functionality
+All data created or used within DeepRacers:
+
+Is stored exclusively on your device
+
+Remains under your complete control
+
+Can be deleted by uninstalling the app
+
+Is never transmitted outside your device
+
+3. Third-Party Services
+DeepRacers does not integrate with any third-party services, frameworks, or libraries that collect user data.
+
+4. Open Source
+DeepRacers is open source software licensed under the MIT License:
+
+
+The complete source code is available at: https://github.com/charleswolfe/deepracer-teleoperation
+
+5. User Control
+You maintain complete control over:
+
+Any data you create within the app
+
+The ability to delete all app data by uninstalling
+
+Access to the source code through the MIT license
+
+6. Changes to This Policy
+If this privacy policy changes in the future, updates will be:
+
+Posted in this document
+
+Reflected in the app's source code repository
+
+Dated with a new "Last Updated" date
+
+7. Contact
+For questions about this privacy policy or the app:
+
+GitHub Issues: https://github.com/charleswolfe/deepracer-teleoperation/issues
+
+Source Code: https://github.com/charleswolfe/deepracer-teleoperation
+
+8. Summary
+DeepRacers respects your privacy by design:
+
+✅ No data collection
+
+✅ No tracking
+
+✅ No external connections
+
+✅ Open source transparency
+
+✅ Complete user control
+
+The app functions entirely on your device with no external data transmission whatsoever.
+
+This privacy policy is intentionally simple because the app does nothing with your data - it doesn't collect any in the first place.
+
