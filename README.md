@@ -49,4 +49,4 @@ MIT
 
 ## Contributing
 
-[Add contribution guidelines here if you want community contributions]
+Contributions are welcome, submit a PR and I'll do my best to review it in a timely matter
