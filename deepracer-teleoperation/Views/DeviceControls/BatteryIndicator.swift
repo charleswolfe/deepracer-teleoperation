@@ -16,8 +16,8 @@ struct BatteryIndicator: View {
     }
     
     var batteryColor: Color {
-        if displayLevel > 50 { return .green }
-        if displayLevel > 20 { return .orange }
+        if displayLevel > 4 { return .green }
+        if displayLevel > 4 { return .orange }
         return .red
     }
     
@@ -33,7 +33,7 @@ struct BatteryIndicator: View {
                 if manager.batteryLevel != -1 {
                     RoundedRectangle(cornerRadius: 2)
                         .fill(batteryColor)
-                        .frame(width: max(0, (displayLevel / 100) * 35), height: 15)
+                        .frame(width: max(0, (displayLevel / 10) * 35), height: 15)
                         .padding(.leading, 3)
                         .animation(.spring, value: displayLevel)
                 }
@@ -61,7 +61,7 @@ struct BatteryIndicator: View {
                 }
             }
             
-            Text(manager.batteryLevel == -1 ? "--%" : "\(manager.batteryLevel)%")
+            Text(manager.batteryLevel == -1 ? "--%" : "\(manager.batteryLevel * 10)%")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.white)
                 .monospacedDigit()
@@ -87,6 +87,6 @@ struct BatteryIndicator: View {
 
 #Preview {
     @Previewable @State var manager = DeepRacerManager.shared
-    manager.batteryLevel = 85
+    manager.batteryLevel = 8
     return BatteryIndicator()
 }

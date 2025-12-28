@@ -244,7 +244,7 @@ class DeepRacerManager {
             let result = try JSONDecoder().decode(BatteryResponse.self, from: data)
             
             await MainActor.run {
-                self.batteryLevel = result.batteryLevel
+                self.batteryLevel = min(result.batteryLevel, 10)
             }
         } catch {
             print("Battery Fetch Error: \(error)")
