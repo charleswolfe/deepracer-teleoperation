@@ -14,6 +14,10 @@ An open-source iOS/iPadOS application that lets you control your AWS DeepRacer v
 - AWS DeepRacer vehicle
 - Both devices connected to the same Wi-Fi network
 
+## Install
+- You can download the procompiled version from the app store [DeepRacer Remote Control on Apple App Store](https://apps.apple.com/us/app/deepracer-remote-control/id6757103957)
+- You can also clone this repo, and build in xcode
+  
 ## Setup Instructions
 
 ### 1. Connect DeepRacer to Wi-Fi
